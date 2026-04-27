@@ -24,10 +24,15 @@ android {
         }
     }
 
-    // 🔥 FIX IMPORTANTE PARA ERROR JAVAC
+    // 🔥 FIX REAL
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // 🔥 FIX IMPORTANTE (OBLIGATORIO SI FALLA JAVAC)
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 

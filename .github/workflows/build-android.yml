@@ -11,39 +11,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar código
+      # 1. Checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Node.js correcto (OBLIGATORIO Capacitor)
+      # 2. Java FIRST (CRÍTICO)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 3. Node.js (Capacitor compatible)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 18
 
-      # 3. Instalar dependencias
+      # 4. Instalar dependencias
       - name: Install dependencies
         run: npm install
 
-      # 4. Build de React
+      # 5. Build React
       - name: Build React app
         run: npm run build
 
-      # 5. Sync Capacitor con Android
+      # 6. Sync Capacitor
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # 6. Dar permisos a Gradle (FIX ERROR 126)
+      # 7. Permisos Gradle
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
-      # 7. Compilar APK Debug
+      # 8. Build APK
       - name: Build APK
         run: |
           cd android
           ./gradlew assembleDebug
 
-      # 8. Subir APK como artefacto descargable
+      # 9. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
