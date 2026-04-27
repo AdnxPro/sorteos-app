@@ -1,49 +1,55 @@
-name: Build APK
+name: Build Android APK
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # 1. Descargar código del repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      # 2. Instalar Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # 3. Instalar dependencias
       - name: Install dependencies
         run: npm install
 
+      # 4. Construir React app
       - name: Build React app
         run: npm run build
 
-      - name: Install Capacitor
-        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+      # 5. Instalar Capacitor Android
+      - name: Install Capacitor Android
+        run: npm install @capacitor/android
 
-      - name: Init Capacitor
-        run: npx cap init "Sorteos Premium" "com.sorteospremium.app" --web-dir=build
+      # 6. Sincronizar Capacitor
+      - name: Sync Capacitor
+        run: npx cap sync android
 
-      - name: Add Android platform
-        run: npx cap add android
+      # 7. Dar permisos a Gradle
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
 
-      - name: Copy web assets
-        run: npx cap copy
-
+      # 8. Build APK Debug
       - name: Build APK
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleDebug
 
+      # 9. Subir APK como artefacto descargable
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
+          name: sorteos-app-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
