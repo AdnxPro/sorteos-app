@@ -2,8 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -11,48 +10,44 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Java FIRST (OBLIGATORIO PARA ANDROID)
+      # ✅ Java correcto para Gradle + Android
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # 3. Node.js (OBLIGATORIO Capacitor >= 22)
+      # ⚠️ Capacitor requiere Node 22+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      # 4. Instalar dependencias
       - name: Install dependencies
         run: npm install
 
-      # 5. Build React
-      - name: Build React app
+      - name: Build React
         run: npm run build
 
-      # 6. Sync Capacitor
+      - name: Install Capacitor Android
+        run: npm install @capacitor/android
+
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # 7. Permisos Gradle
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
-      # 8. Build APK
-      - name: Build APK
+      - name: Build APK Release
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
-      # 9. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: sorteos-app-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: sorteos-release-apk
+          path: android/app/build/outputs/apk/release/
