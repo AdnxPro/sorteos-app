@@ -4,36 +4,48 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # 1. Descargar código
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      # 2. Node.js correcto (OBLIGATORIO Capacitor)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      # 3. Instalar dependencias
       - name: Install dependencies
         run: npm install
 
+      # 4. Build de React
       - name: Build React app
         run: npm run build
 
+      # 5. Sync Capacitor con Android
       - name: Sync Capacitor
         run: npx cap sync android
 
+      # 6. Dar permisos a Gradle (FIX ERROR 126)
+      - name: Make Gradle executable
+        run: chmod +x android/gradlew
+
+      # 7. Compilar APK Debug
       - name: Build APK
         run: |
           cd android
           ./gradlew assembleDebug
 
+      # 8. Subir APK como artefacto descargable
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: sorteos-app-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
