@@ -10,42 +10,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # 1. Código
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ Java correcto para Gradle + Android
+      # 2. Java 17 (OBLIGATORIO)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # ⚠️ Capacitor requiere Node 22+
+      # 🔥 fuerza Java correcto en runner
+      - name: Force Java env
+        run: echo "JAVA_HOME=$JAVA_HOME_17_X64" >> $GITHUB_ENV
+
+      # 3. Node 22 (Capacitor moderno)
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      # 4. Dependencias
       - name: Install dependencies
         run: npm install
 
-      - name: Build React
+      # 5. Build React
+      - name: Build React app
         run: npm run build
 
+      # 6. Capacitor Android
       - name: Install Capacitor Android
         run: npm install @capacitor/android
 
       - name: Sync Capacitor
         run: npx cap sync android
 
+      # 7. Gradle permisos
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
+      # 8. Build APK RELEASE
       - name: Build APK Release
         run: |
           cd android
           ./gradlew assembleRelease
 
+      # 9. Subir APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
